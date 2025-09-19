@@ -1,8 +1,10 @@
-name: Claude Code • Auto PR on Comment
+name: Claude Code • Auto PR on Comment or External Trigger
 
 on:
   issue_comment:
     types: [created]
+  repository_dispatch:
+    types: [product-is-doc-issue]
   schedule:
     - cron: "0 * * * *" 
   workflow_dispatch: {}
@@ -12,6 +14,48 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Handle repository_dispatch events from product-is
+  handle_product_is_issue:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'repository_dispatch' && github.event.action == 'product-is-doc-issue'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh jq
+
+      - name: Create issue tracker in docs-is
+        env:
+          GITHUB_TOKEN: ${{ secrets.DOC_FIXING_AGENT_GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.client_payload.issue_number }}
+          ISSUE_TITLE: ${{ github.event.client_payload.issue_title }}
+          ISSUE_BODY: ${{ github.event.client_payload.issue_body }}
+          ISSUE_URL: ${{ github.event.client_payload.issue_url }}
+          ORIG_REPO: ${{ github.event.client_payload.original_repository }}
+        run: |
+          # Create tracking issue in docs-is
+          TRACKING_BODY="This is a tracking issue for documentation fix request from ${ORIG_REPO}#${ISSUE_NUMBER}
+          
+          Original issue: ${ISSUE_URL}
+          
+          Original title: ${ISSUE_TITLE}
+          
+          Original description:
+          ${ISSUE_BODY}"
+          
+          # Create the tracking issue
+          DOCS_ISSUE=$(gh issue create --title "[External] ${ISSUE_TITLE}" --body "${TRACKING_BODY}" --label "AI-Agent/Queued" --repo ${{ github.repository }})
+          
+          # Extract issue number from URL
+          DOCS_ISSUE_NUMBER=$(echo $DOCS_ISSUE | grep -oE '[0-9]+$')
+          
+          # Add comment to original issue
+          gh issue comment ${ISSUE_NUMBER} --repo ${ORIG_REPO} --body "I've created a tracking issue in the docs-is repository: $DOCS_ISSUE. I'll work on fixing this documentation issue and will update this issue when a PR is created."
+          
+          echo "Created tracking issue: $DOCS_ISSUE"
+
   get_issue_and_assign:
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -80,9 +124,29 @@ jobs:
             sudo apt-get update && sudo apt-get install -y gettext-base
           fi
           
-          # Export environment variables for substitution
-          export ISSUE_NUMBER="${{ github.event.issue.number }}"
-          export REPOSITORY="${{ vars.DOC_FIXING_AGENT_REPOSITORY }}"
+          # Determine if this is a product-is issue by checking issue body
+          ISSUE_BODY=$(gh issue view ${{ github.event.issue.number }} --json body -q .body)
+          
+          # Check if this is an external issue
+          if echo "$ISSUE_BODY" | grep -q "Original issue: https://github.com/"; then
+            # Extract original issue information
+            ORIG_ISSUE_URL=$(echo "$ISSUE_BODY" | grep -oP "Original issue: \K.*" | head -1)
+            ORIG_REPO=$(echo "$ORIG_ISSUE_URL" | cut -d'/' -f4-5)
+            ORIG_ISSUE_NUM=$(echo "$ORIG_ISSUE_URL" | grep -oP "issues/\K[0-9]+")
+            
+            # Set these for the system prompt
+            export REPOSITORY="$ORIG_REPO"
+            export ISSUE_NUMBER="$ORIG_ISSUE_NUM" 
+            export EXTERNAL_ISSUE="true"
+            export TRACKING_ISSUE="${{ github.event.issue.number }}"
+          else
+            # Regular docs-is issue
+            export ISSUE_NUMBER="${{ github.event.issue.number }}"
+            export REPOSITORY="${{ vars.DOC_FIXING_AGENT_REPOSITORY }}"
+            export EXTERNAL_ISSUE="false"
+            export TRACKING_ISSUE=""
+          fi
+          
           export LATEST_VERSION="${{ vars.DOC_FIXING_AGENT_LATEST_VERSION }}"  
           
           # Process the system prompt with variable substitution
@@ -97,13 +161,17 @@ jobs:
           echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
           echo "REPOSITORY=$REPOSITORY" >> $GITHUB_ENV
           echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+          echo "EXTERNAL_ISSUE=$EXTERNAL_ISSUE" >> $GITHUB_ENV
+          echo "TRACKING_ISSUE=$TRACKING_ISSUE" >> $GITHUB_ENV
 
       - name: Run Claude
         id: run_claude
         uses: anthropics/claude-code-action@v1
         env:
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          REPOSITORY: ${{ vars.DOC_FIXING_AGENT_REPOSITORY }}
+          ISSUE_NUMBER: ${{ env.ISSUE_NUMBER }}
+          REPOSITORY: ${{ env.REPOSITORY }}
+          EXTERNAL_ISSUE: ${{ env.EXTERNAL_ISSUE }}
+          TRACKING_ISSUE: ${{ env.TRACKING_ISSUE }}
         with:
           anthropic_api_key: ${{ secrets.DOC_FIXING_AGENT_ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.DOC_FIXING_AGENT_GITHUB_TOKEN }}
@@ -112,6 +180,19 @@ jobs:
           claude_args: |
             --allowedTools "Bash(*),Bash(git:*),Bash(mkdocs:*),Bash(python3:*),Bash(pip3:*),WebFetch,mcp__github__create_pull_request,mcp__github__get_issue,mcp__github__search_pull_requests,mcp__github__list_branches,Edit,Read,Write,mcp__github__update_issue,mcp__github__create_branch,mcp__github__add_issue_comment,mcp__github__get_file_contents"
             --model claude-sonnet-4-20250514
+
+      - name: Update original issue if external
+        if: env.EXTERNAL_ISSUE == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.CROSS_REPO_PAT }}
+        run: |
+          # Check if a PR was created by looking at the claude run output
+          PR_URL=$(grep -oP "I've created PR: \K.*" claude_output.txt || echo "")
+          
+          if [ -n "$PR_URL" ]; then
+            # Add comment to original issue
+            gh issue comment ${{ env.ISSUE_NUMBER }} --repo ${{ env.REPOSITORY }} --body "I've created a PR to fix this documentation issue: $PR_URL"
+          fi
 
       - name: Get next queued issue
         id: get_next_queued
