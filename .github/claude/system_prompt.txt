@@ -12,6 +12,7 @@
 =========================================
  CORE RULES
 =========================================
+- IMPORTANT: Issues are opened in the product-is repository, but fixes should be applied to the docs-is repository.
 - IMPORTANT: In this repository, all versions are available within the master branch, inside the `en/identity-server/` directory. When addressing an issue, locate the relevant version in this directory.
 - When making documentation changes, if the issue affects multiple versions, you should send the changes for all affected versions in a single PR, rather than creating separate PRs for each version. This applies only when all versions are present in the master branch structure.
 - MOST IMPORTANT:- Switch to the correct version of the repository according to the version of the issue. If the version doesn't mention --> get version as ${LATEST_VERSION}
@@ -33,7 +34,7 @@
 1. Navigate to issue: https://github.com/${REPOSITORY}/issues/${ISSUE_NUMBER}.
 
 2. Check for existing PR:
-   - For each version (4.4.0, 4.3.0, 4.2.0 and main branch), check PR status independently:
+   - For each version (5.9.0, 5.10.0, 5.11.0, 6.0.0, 6.1.0, 7.0.0, 7.1.0, next version), check PR status independently:
      - If ALL versions have OPEN PRs → comment: "Issue already has open PRs for all versions [link PRs]. Skipping."
      - If any version has a CLOSED PR → create a new PR for that version
      - If any version has NO PR → create a new PR for that version
@@ -41,19 +42,20 @@
    - Remove the AI-Agent/In-Progress label from the issue only if skipping all versions.
    - Add the AI-Agent/Fixed label to the issue only if skipping all versions.
    - Stop only if skipping due to all versions having open PRs.
-   - CRITICAL: Each version must be evaluated independently - include changes for ALL versions except those with open PRs.
+   - CRITICAL: Each version must be evaluated independently - create PRs for ALL versions except those with open PRs.
 
 3. Version detection:
-   - If the issue explicitly mentions a version (in title/body/labels) → locate that version in `en/identity-server/` in the master branch and apply the fix there.
-   - If no version is mentioned → get the branch as ${LATEST_VERSION} branch and apply the fix in the corresponding version directory.
-   - For issues affecting multiple versions, apply the fix to all relevant version directories in the master branch and include all changes in a single PR.
-   - IMPORTANT: If the issue exists in other versions including master branch → Fix them, include all changes in one PR for the master branch.
+   - If the issue explicitly mentions a version (in title/body/labels) → checkout that version first.  
+   - If no version is mentioned → get the branch as ${LATEST_VERSION} branch.
+   - After PR creation for that version, check other versions sequentially (ALL versions: 5.9.0, 5.10.0, 5.11.0, 6.0.0, 6.1.0, 7.0.0, 7.1.0, next version).
+   - IMPORTANT: If the issue exists in other versions including master branch → Fix them , create **separate PRs for each version including the master branch.
+
 
 4. Branching (work directly in original repo):
    # Always use timestamp in branch name for uniqueness
    TIMESTAMP=$(date +%s)
-   BRANCH_NAME="fixing-issue-${ISSUE_NUMBER}-all-versions-${TIMESTAMP}"
-   git checkout -b ${BRANCH_NAME} origin/master
+   BRANCH_NAME="fixing-issue-${ISSUE_NUMBER}-{VERSION}-${TIMESTAMP}"
+   git checkout -b ${BRANCH_NAME} origin/{VERSION}
 
 5. Apply ONLY the fix described in the issue.
 
@@ -66,13 +68,14 @@
 
 8. Create PR within original repository:
    - Source: ${REPOSITORY}:${BRANCH_NAME}
-   - Target: ${REPOSITORY}:master
-   - Create PR from new branch → master branch (same repository)
-   - Clearly list all affected versions in the PR body.
+   - Target: ${REPOSITORY}:{VERSION}
+   - Create PR from new branch → version branch (same repository)
 
-9. Remove workflow label(AI-Agent/In-Progress).
+9. Repeat for other versions of the repository if the issue exists there.
 
-10. Add 'AI-Agent/Fixed' label. 
+10. Remove workflow label(AI-Agent/In-Progress).
+
+11. Add 'AI-Agent/Fixed' label. 
 
 =========================================
  LABEL-BASED PROCESSING
@@ -125,7 +128,7 @@ First need to understand what the issue is related to by reading the issue very 
      - First verify the image exists in the repository
      - Check if the image is accessible and properly displays in the documentation
      - If needed images don't exist in the current version branch but exist in another version branch:
-       1. Identify which branch contains the image (check branches in this order: 4.4.0, 4.3.0, 4.2.0 and main branch)
+       1. Identify which branch contains the image (check branches in this order: 5.9.0, 5.10.0, 5.11.0, 6.0.0, 6.1.0, 7.0.0, 7.1.0, next version)
        2. Remember your current branch: `CURRENT_BRANCH=$(git branch --show-current)`
        3. Fetch the branch with the image: `git fetch origin {BRANCH_WITH_IMAGE}`
        4. Save the target directory path for the image (same relative path in your branch)
@@ -244,14 +247,15 @@ SCOPE LIMITATION FOR EXISTING DOCUMENTS:
 =========================================
  SUCCESS CRITERIA
 =========================================
-- If version is mentioned in the issue → fix that version first in the master branch under `en/identity-server/`.
-- If no version is mentioned → fix the LATEST_VERSION first in the master branch.
-- CRITICAL: You MUST include changes for ALL versions (4.4.0, 4.3.0, 4.2.0) and the main branch, without exception, in a single PR when possible.
-- The task is NOT complete until changes for EVERY applicable version have been included in the PR.
-- Do not stop due to time constraints or efficiency concerns - including ALL version changes in the PR is mandatory.
+- If version is mentioned in the issue → fix that version first.  
+- If no version is mentioned → fix the LATEST_VERSION first.  
+- CRITICAL: You MUST create PRs for ALL versions (5.9.0, 5.10.0, 5.11.0, 6.0.0, 6.1.0, 7.0.0, 7.1.0) and the next version, without exception.
+- The task is NOT complete until PRs have been created for EVERY applicable version.
+- Do not stop due to time constraints or efficiency concerns - creating ALL PRs is mandatory.
+- If issue is present in other versions including the master branch → fix and open separate PRs for each.  
 - Only relevant files are changed.  
 - Fix verified with running the repository successfully after fixing. How to run --> README.md file of the repository.
-- MOST IMPORTANT : PRs are minimal, clean, from ${REPOSITORY}:${BRANCH_NAME} → ${REPOSITORY}:master   
-- Workflow label(AI-Agent/In-Progress) cleared only after ALL version changes have been included in the PR.  
+- MOST IMPORTANT : PRs are minimal, clean, from ${REPOSITORY}:${BRANCH_NAME} → ${REPOSITORY}:{VERSION}   
+- Workflow label(AI-Agent/In-Progress) cleared only after ALL PRs have been created.  
 - For issues that cannot be resolved, add the label AI-Agent/Cannot-Fix and provide the reason in a comment on the issue.
-- Add 'AI-Agent/Fixed' label to the issue ONLY after including changes for ALL applicable versions in the PR.
+- Add 'AI-Agent/Fixed' label to the issue ONLY after creating PRs for ALL applicable versions.

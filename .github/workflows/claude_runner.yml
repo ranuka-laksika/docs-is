@@ -9,6 +9,11 @@ on:
     - cron: "0 * * * *" 
   workflow_dispatch: {}
 
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
 concurrency:
   group: doc-fixing-ai-agent
   cancel-in-progress: false
@@ -52,7 +57,8 @@ jobs:
           DOCS_ISSUE_NUMBER=$(echo $DOCS_ISSUE | grep -oE '[0-9]+$')
           
           # Add comment to original issue
-          gh issue comment ${ISSUE_NUMBER} --repo ${ORIG_REPO} --body "I've created a tracking issue in the docs-is repository: $DOCS_ISSUE. I'll work on fixing this documentation issue and will update this issue when a PR is created."
+          # Use PRODUCT_IS_ACCESS_TOKEN to interact with product-is repository
+          gh issue comment ${ISSUE_NUMBER} --repo ${ORIG_REPO} --body "I've created a tracking issue in the docs-is repository: $DOCS_ISSUE. I'll work on fixing this documentation issue and will update this issue when a PR is created." --token ${{ secrets.PRODUCT_IS_ACCESS_TOKEN }}
           
           echo "Created tracking issue: $DOCS_ISSUE"
 
@@ -70,7 +76,7 @@ jobs:
       - name: Get the Oldest Issue with AI-Agent/Queued label
         id: get_oldest_queued
         env:
-          GITHUB_TOKEN: ${{ secrets.DOC_FIXING_AGENT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ISSUE_JSON=$(gh issue list --label "AI-Agent/Queued" --state open --json number,createdAt --limit 100 \
             | jq '[.[]] | sort_by(.createdAt) | .[0]')
@@ -84,7 +90,7 @@ jobs:
       - name: Update labels and trigger Claude
         if: steps.get_oldest_queued.outputs.oldest_issue_number != ''
         env: 
-          GITHUB_TOKEN: ${{ secrets.DOC_FIXING_AGENT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: | 
           ISSUE=${{ steps.get_oldest_queued.outputs.oldest_issue_number }}
 
@@ -103,7 +109,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ vars.DOC_FIXING_AGENT_REPOSITORY }}  
-          token: ${{ secrets.DOC_FIXING_AGENT_GITHUB_TOKEN }}
           fetch-depth: 0 
 
       - name: Configure git for commits
@@ -174,7 +179,7 @@ jobs:
           TRACKING_ISSUE: ${{ env.TRACKING_ISSUE }}
         with:
           anthropic_api_key: ${{ secrets.DOC_FIXING_AGENT_ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.DOC_FIXING_AGENT_GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: ${{ env.SYSTEM_PROMPT }}
           trigger_phrase: "@wso2-engineering-bot" 
           claude_args: |
@@ -184,20 +189,20 @@ jobs:
       - name: Update original issue if external
         if: env.EXTERNAL_ISSUE == 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.CROSS_REPO_PAT }}
+          GITHUB_TOKEN: ${{ secrets.PRODUCT_IS_ACCESS_TOKEN }}
         run: |
           # Check if a PR was created by looking at the claude run output
           PR_URL=$(grep -oP "I've created PR: \K.*" claude_output.txt || echo "")
           
           if [ -n "$PR_URL" ]; then
-            # Add comment to original issue
+            # Add comment to original issue using the fine-grained token
             gh issue comment ${{ env.ISSUE_NUMBER }} --repo ${{ env.REPOSITORY }} --body "I've created a PR to fix this documentation issue: $PR_URL"
           fi
 
       - name: Get next queued issue
         id: get_next_queued
         env:
-          GITHUB_TOKEN: ${{ secrets.DOC_FIXING_AGENT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ISSUE_JSON=$(gh issue list --label "AI-Agent/Queued" --state open --json number,createdAt --limit 100 \
             | jq '[.[]] | sort_by(.createdAt) | .[0]')
@@ -216,7 +221,7 @@ jobs:
 
       - name: Update labels and trigger Claude
         env: 
-          GITHUB_TOKEN: ${{ secrets.DOC_FIXING_AGENT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: steps.get_next_queued.outputs.next_issue_number != ''
         run: | 
           ISSUE=${{ steps.get_next_queued.outputs.next_issue_number }}
