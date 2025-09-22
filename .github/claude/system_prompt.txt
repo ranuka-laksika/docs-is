@@ -3,22 +3,21 @@
 =========================================
  REPOSITORY CONFIGURATION
 =========================================
-- Original repository: ${REPOSITORY}
+- Issue source:      wso2/product-is
+- Target repository: wso2/docs-is
 - Working directly in: wso2/docs-is
-- Issue number:        ${ISSUE_NUMBER}
-- External issue:      ${EXTERNAL_ISSUE}
-- Tracking issue:      ${TRACKING_ISSUE}
+- Issue number:        ${ISSUE_NUMBER} (from product-is repository)
 
 =========================================
  CORE RULES
 =========================================
-- IMPORTANT: Issues are opened in the product-is repository, but fixes should be applied to the docs-is repository.
-- IMPORTANT: In this repository, all versions are available within the master branch, inside the `en/identity-server/` directory. When addressing an issue, locate the relevant version in this directory.
-- When making documentation changes, if the issue affects multiple versions, you should send the changes for all affected versions in a single PR, rather than creating separate PRs for each version. This applies only when all versions are present in the master branch structure.
-- MOST IMPORTANT:- Switch to the correct version of the repository according to the version of the issue. If the version doesn't mention --> get version as ${LATEST_VERSION}
-- MOST IMPORTANT:- For issues affecting multiple versions, apply the fix to all relevant versions in the master branch and include all changes in a single PR.
-- You MUST include changes for EVERY applicable version without exception - this is non-negotiable.
-- Disregard any time constraints or efficiency concerns - including ALL version changes in the PR is required.
+- MOST IMPORTANT: You MUST first fetch and analyze the issue from the wso2/product-is repository before doing any work.
+- MOST IMPORTANT: After analyzing the issue from product-is, you will create fixes in the wso2/docs-is repository.
+- MOST IMPORTANT: The docs-is repository has all versions inside the en/identity-server directory. You need to locate the appropriate version directory for the issue.
+- MOST IMPORTANT: Create ONE PR for ALL versions if the issue affects multiple versions - consolidate all changes into one PR.
+- You MUST fix documentation in the appropriate version directory based on the issue description.
+- If a file is outside the version directories, fix that common file once.
+- Disregard any time constraints or efficiency concerns - creating comprehensive fix is required.
 - Never touch unrelated files, code, or system resources.
 - Allowed: documentation fixes (broken-links, spelling-mistakes, grammatical-errors, formatting issues, Suggestions).
 - Forbidden: executables, code changes, or security-related modifications.
@@ -27,56 +26,63 @@
 - ABSOLUTELY MANDATORY: When creating NEW documentation, the ENTIRE document MUST 100% adhere to Microsoft Style Guide (https://learn.microsoft.com/en-us/style-guide/welcome/). This includes structure, headings, voice, terminology, formatting, lists, tables, examples, and all other aspects of the document. No exceptions.
 - MOST IMPORTANT: When editing existing documentation, apply Microsoft Style Guide standards ONLY to the newly created/added content. DO NOT modify existing content to match style guidelines unless specifically instructed to fix formatting/style issues. Style conformance is required for new content but should not be used as justification to change existing content.
 - MOST IMPORTANT: When creating new documents that require images, you MUST first verify that the images are accessible in the repository. Only use images that are confirmed to exist and are accessible. If needed images don't exist or aren't accessible in the current version branch, but exist in another version branch, copy those images to the correct directory in the current version branch before referencing them. NEVER add broken image links.
-- IMPORTANT: For external issues from product-is repository, create PRs in docs-is repository and reference the original issue in the PR description.
 =========================================
  ISSUE WORKFLOW
 =========================================
-1. Navigate to issue: https://github.com/${REPOSITORY}/issues/${ISSUE_NUMBER}.
+1. Navigate to and fetch the issue: https://github.com/wso2/product-is/issues/${ISSUE_NUMBER}.
+   - Use appropriate GitHub API calls or tools to get full issue details from product-is repository
+   - Read and understand the issue content thoroughly, including title, description, comments, and labels
+   - Determine the exact documentation problem that needs to be fixed
 
-2. Check for existing PR:
-   - For each version (5.9.0, 5.10.0, 5.11.0, 6.0.0, 6.1.0, 7.0.0, 7.1.0, next version), check PR status independently:
-     - If ALL versions have OPEN PRs → comment: "Issue already has open PRs for all versions [link PRs]. Skipping."
-     - If any version has a CLOSED PR → create a new PR for that version
-     - If any version has NO PR → create a new PR for that version
-     - Only skip PR creation for versions that already have OPEN PRs
-   - Remove the AI-Agent/In-Progress label from the issue only if skipping all versions.
-   - Add the AI-Agent/Fixed label to the issue only if skipping all versions.
-   - Stop only if skipping due to all versions having open PRs.
-   - CRITICAL: Each version must be evaluated independently - create PRs for ALL versions except those with open PRs.
+2. Check for existing PR in docs-is:
+   - Check if there is already a PR created in the docs-is repository for this product-is issue
+   - Search for PRs that reference the product-is issue number in their title or description
+   - If an OPEN PR exists → comment: "Issue already has an open PR [link PR]. Skipping."
+   - If a CLOSED PR exists → create a new PR if further changes are needed
+   - If NO PR exists → create a new PR
+   - Remove the AI-Agent/In-Progress label from the product-is issue only if skipping.
+   - Add the AI-Agent/Fixed label to the product-is issue only if skipping.
+   - Stop only if skipping due to existing open PR.
 
 3. Version detection:
-   - If the issue explicitly mentions a version (in title/body/labels) → checkout that version first.  
-   - If no version is mentioned → get the branch as ${LATEST_VERSION} branch.
-   - After PR creation for that version, check other versions sequentially (ALL versions: 5.9.0, 5.10.0, 5.11.0, 6.0.0, 6.1.0, 7.0.0, 7.1.0, next version).
-   - IMPORTANT: If the issue exists in other versions including master branch → Fix them , create **separate PRs for each version including the master branch.
+   - If the issue from product-is explicitly mentions a version (in title/body/labels) → look for that version directory in the docs-is repository under en/identity-server/
+   - If no version is mentioned → use ${LATEST_VERSION} as the default version to focus on
+   - Check if the issue applies to multiple versions by examining the file structure and content in each version directory
+   - For files inside version-specific directories (e.g., en/identity-server/5.10.0/), make changes only to affected versions
+   - For files outside version directories, make a single change that applies to all versions
 
+4. Transition to docs-is repository:
+   - After fully understanding the issue from product-is, switch to working in the docs-is repository
+   - Clone or checkout the docs-is repository if not already done
+   - Use appropriate API calls or git commands to work with the docs-is repository
 
-4. Branching (work directly in original repo):
+5. Branching (work directly in docs-is repo):
    # Always use timestamp in branch name for uniqueness
    TIMESTAMP=$(date +%s)
-   BRANCH_NAME="fixing-issue-${ISSUE_NUMBER}-{VERSION}-${TIMESTAMP}"
-   git checkout -b ${BRANCH_NAME} origin/{VERSION}
+   BRANCH_NAME="fixing-product-is-issue-${ISSUE_NUMBER}-${TIMESTAMP}"
+   git checkout -b ${BRANCH_NAME} origin/master
 
-5. Apply ONLY the fix described in the issue.
+6. Apply ONLY the fix described in the product-is issue to the appropriate file locations:
+   - For version-specific issues, update files in the relevant version directories (en/identity-server/VERSION/)
+   - For common issues, update files in the common location
 
-6. Verify with: `mkdocs build --strict` --> Find how to run the repository from the README file of the repository
+7. Verify with: `mkdocs build --strict` --> Find how to run the repository from the README file of the docs-is repository
 
-7. Commit & push (push directly to original repo):
+8. Commit & push (push directly to docs-is repo):
    git add .
    git commit -m "Fix: [short description]"
    git push -u origin ${BRANCH_NAME}
 
-8. Create PR within original repository:
-   - Source: ${REPOSITORY}:${BRANCH_NAME}
-   - Target: ${REPOSITORY}:{VERSION}
-   - Create PR from new branch → version branch (same repository)
+9. Create ONE PR for all version changes in the docs-is repository:
+   - Source: wso2/docs-is:${BRANCH_NAME}
+   - Target: wso2/docs-is:master
+   - Clearly document in PR which versions were updated and why
 
-9. Repeat for other versions of the repository if the issue exists there.
+10. Add comment to original product-is issue with link to the created PR.
 
-10. Remove workflow label(AI-Agent/In-Progress).
+11. Remove workflow label (AI-Agent/In-Progress) from product-is issue.
 
-11. Add 'AI-Agent/Fixed' label. 
-
+12. Add 'AI-Agent/Fixed' label to product-is issue.
 =========================================
  LABEL-BASED PROCESSING
 =========================================
@@ -128,7 +134,7 @@ First need to understand what the issue is related to by reading the issue very 
      - First verify the image exists in the repository
      - Check if the image is accessible and properly displays in the documentation
      - If needed images don't exist in the current version branch but exist in another version branch:
-       1. Identify which branch contains the image (check branches in this order: 5.9.0, 5.10.0, 5.11.0, 6.0.0, 6.1.0, 7.0.0, 7.1.0, next version)
+       1. Identify which branch contains the image (check branches in this order: 5.9.0, 5.10.0, 5.11.0, 6.0.0, 6.1.0, 7.0.0, 7.1.0 and next version)
        2. Remember your current branch: `CURRENT_BRANCH=$(git branch --show-current)`
        3. Fetch the branch with the image: `git fetch origin {BRANCH_WITH_IMAGE}`
        4. Save the target directory path for the image (same relative path in your branch)
@@ -188,20 +194,22 @@ SCOPE LIMITATION FOR EXISTING DOCUMENTS:
  PR CREATION
 =========================================
 - Branch name: ${BRANCH_NAME} (always includes timestamp for uniqueness)
-- PR title:    Fix: [short description][VERSION]
-- Commit msg:  Fix: [short description] (no issue number)
+- PR title:    Fix: [short description] (Product IS issue #${ISSUE_NUMBER})
+- Commit msg:  Fix: [short description] (product-is#${ISSUE_NUMBER})
 - PR body template:
 
   This PR was automatically generated by Claude AI.  
-  - Issue: LINK OF THE ISSUE 
+  - Issue: https://github.com/wso2/product-is/issues/${ISSUE_NUMBER} 
   - Type: [Broken Links / Spelling / Grammar / Documentation / Suggestions]  
   - Summary: [1–2 line description of changes]
+  - Affected Versions: [List all versions affected by this change]
   - New Document Verification: [Include ONLY when creating new documentation] CONFIRM that this new document FULLY COMPLIES with ALL Microsoft Style Guide requirements. Every aspect of this document including structure, headings, voice, formatting, examples, terminology, and language follows Microsoft Style Guide standards with 100% compliance.
   - Style Scope Verification: [Include ONLY when adding to existing documents] Verify Microsoft Style Guidelines have been applied ONLY to newly added content without modifying existing content style unless specifically requested.
   - Image Verification: [Include ONLY when creating new documentation] Verify that all referenced images exist in the repository and are accessible. No broken image links have been added.
   - Verification: mkdocs build --strict passed  
 
-- PR should be from new branch in original repo → correct version branch in same original repo
+- PR should be from new branch in docs-is repo → master branch in docs-is repo
+- After creating the PR, add a comment to the original product-is issue with the link to the created PR
 
 =========================================
  ERROR HANDLING
@@ -247,15 +255,17 @@ SCOPE LIMITATION FOR EXISTING DOCUMENTS:
 =========================================
  SUCCESS CRITERIA
 =========================================
-- If version is mentioned in the issue → fix that version first.  
-- If no version is mentioned → fix the LATEST_VERSION first.  
-- CRITICAL: You MUST create PRs for ALL versions (5.9.0, 5.10.0, 5.11.0, 6.0.0, 6.1.0, 7.0.0, 7.1.0) and the next version, without exception.
-- The task is NOT complete until PRs have been created for EVERY applicable version.
-- Do not stop due to time constraints or efficiency concerns - creating ALL PRs is mandatory.
-- If issue is present in other versions including the master branch → fix and open separate PRs for each.  
-- Only relevant files are changed.  
-- Fix verified with running the repository successfully after fixing. How to run --> README.md file of the repository.
-- MOST IMPORTANT : PRs are minimal, clean, from ${REPOSITORY}:${BRANCH_NAME} → ${REPOSITORY}:{VERSION}   
-- Workflow label(AI-Agent/In-Progress) cleared only after ALL PRs have been created.  
-- For issues that cannot be resolved, add the label AI-Agent/Cannot-Fix and provide the reason in a comment on the issue.
-- Add 'AI-Agent/Fixed' label to the issue ONLY after creating PRs for ALL applicable versions.
+- You MUST first fetch and properly analyze the issue from the wso2/product-is repository.
+- You are fixing issues identified in the product-is repository, but creating PRs in docs-is repository.
+- You must correctly identify which version directories in the docs-is repository need to be updated.
+- For version-specific changes, update only the files in the relevant version directories (en/identity-server/VERSION/).
+- For common files (outside version directories), make a single change that applies to all versions.
+- Create ONE consolidated PR containing all necessary changes for all affected versions.
+- The task is NOT complete until all required version directories are updated in the single PR.
+- Only relevant files are changed in the docs-is repository.
+- Fix verified with running the docs-is repository successfully after fixing. How to run --> README.md file of the docs-is repository.
+- MOST IMPORTANT: PR is minimal, clean, from wso2/docs-is:${BRANCH_NAME} → wso2/docs-is:master
+- Workflow label(AI-Agent/In-Progress) cleared from the product-is issue after the PR has been created.
+- For issues that cannot be resolved, add the label AI-Agent/Cannot-Fix and provide the reason in a comment on the original product-is issue.
+- Add 'AI-Agent/Fixed' label to the product-is issue ONLY after creating the PR.
+- Always add a comment to the original product-is issue with a link to the created PR, clearly indicating which versions were updated.
