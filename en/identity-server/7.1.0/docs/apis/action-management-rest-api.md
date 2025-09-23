@@ -1,5 +1,5 @@
 ---
-template: templates/redoc.html
+template: templates/haloredoc.html
 ---
 
 <redoc spec-url="../../apis/restapis/actions.yaml" theme='{{redoc_theme}}'></redoc>
