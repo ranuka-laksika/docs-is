@@ -7,7 +7,6 @@
 - Target repository: ranuka-laksika/docs-is
 - Working directly in: ranuka-laksika/docs-is
 - Issue number:        ${ISSUE_NUMBER} (from product-is repository)
-- Latest version:      ${LATEST_VERSION}
 
 =========================================
  CORE RULES
@@ -27,14 +26,15 @@
 - ABSOLUTELY MANDATORY: When creating NEW documentation, the ENTIRE document MUST 100% adhere to Microsoft Style Guide (https://learn.microsoft.com/en-us/style-guide/welcome/). This includes structure, headings, voice, terminology, formatting, lists, tables, examples, and all other aspects of the document. No exceptions.
 - MOST IMPORTANT: When editing existing documentation, apply Microsoft Style Guide standards ONLY to the newly created/added content. DO NOT modify existing content to match style guidelines unless specifically instructed to fix formatting/style issues. Style conformance is required for new content but should not be used as justification to change existing content.
 - MOST IMPORTANT: When creating new documents that require images, you MUST first verify that the images are accessible in the repository. Only use images that are confirmed to exist and are accessible. If needed images don't exist or aren't accessible in the current version branch, but exist in another version branch, copy those images to the correct directory in the current version branch before referencing them. NEVER add broken image links.
-
 =========================================
  ISSUE WORKFLOW
 =========================================
 1. Navigate to and fetch the issue: https://github.com/ranuka-laksika/product-is/issues/${ISSUE_NUMBER}.
-   - Use appropriate GitHub API calls to get full issue details from product-is repository
+   - Use appropriate GitHub API calls or tools to get full issue details from product-is repository
    - Read and understand the issue content thoroughly, including title, description, comments, and labels
    - Determine the exact documentation problem that needs to be fixed
+
+IMPORTANT: Here your origin should be the docs-is repository not the product-is repostory.
 
 2. Check for existing PR in docs-is:
    - Check if there is already a PR created in the docs-is repository for this product-is issue
@@ -55,53 +55,35 @@
 
 4. Transition to docs-is repository:
    - After fully understanding the issue from product-is, switch to working in the docs-is repository
-   - Use GitHub API with fine-grained token to access both repositories
+   - Use appropriate API calls or git commands to work with the docs-is repository
 
 5. Branching (work directly in docs-is repo):
-   - Create separate branches for each affected version using the format:
-   ```
-   # For timestamp uniqueness
+   # Always use timestamp in branch name for uniqueness
    TIMESTAMP=$(date +%s)
-   BASE_BRANCH_NAME="fixing-product-is-issue-${ISSUE_NUMBER}-${TIMESTAMP}"
-   
-   # For each affected version
-   VERSION_BRANCH="${BASE_BRANCH_NAME}-${VERSION}"
-   git checkout -b ${VERSION_BRANCH} origin/master
-   ```
-   - For common files outside version directories, use the base branch name
+   BRANCH_NAME="fixing-product-is-issue-${ISSUE_NUMBER}-${TIMESTAMP}"
+   git checkout -b ${BRANCH_NAME} origin/master (This will create a new branch from the docs-is repository)
 
 6. Apply ONLY the fix described in the product-is issue to the appropriate file locations:
    - For version-specific issues, update files in the relevant version directories (en/identity-server/VERSION/)
    - For common issues, update files in the common location
 
-7. Verify with: `mkdocs build --strict` for each version-specific change
-   - Follow instructions in the README file of the docs-is repository
+7. Verify with: `mkdocs build --strict` --> Find how to run the repository from the README file of the docs-is repository
 
-8. Commit & push (for each version branch):
-   ```
+8. Commit & push (push directly to docs-is repo):
    git add .
-   git commit -m "Fix: [short description] for version [VERSION] (product-is#${ISSUE_NUMBER})"
-   git push -u origin ${VERSION_BRANCH}
-   ```
-   - Push directly to origin without additional git configuration
+   git commit -m "Fix: [short description]"
+   git push -u origin ${BRANCH_NAME}
 
-9. Create SEPARATE PRs for all version changes in the docs-is repository:
-   - Source: ranuka-laksika/docs-is:${VERSION_BRANCH}
+9. Create SEPERATE PRs for all version changes in the docs-is repository:
+   - Source: ranuka-laksika/docs-is:${BRANCH_NAME}
    - Target: ranuka-laksika/docs-is:master
-   - Clearly document in PR which version was updated and why
-   - NEVER consolidate multiple version changes into a single PR
+   - Clearly document in PR which versions were updated and why
 
-10. Add comment to original product-is issue with links to ALL created PRs:
-    - List each PR with its corresponding version
-    - Format: "Created the following PRs to address this issue:
-      * For version X.X.X: [PR link]
-      * For version Y.Y.Y: [PR link]
-      * For common files: [PR link]"
+10. Add comment to original product-is issue with link to the created PR.
 
-11. Remove workflow label (AI-Agent/In-Progress) from product-is issue AFTER creating ALL required PRs.
+11. Remove workflow label (AI-Agent/In-Progress) from product-is issue.
 
-12. Add 'AI-Agent/Fixed' label to product-is issue ONLY after ALL PRs are created successfully.
-
+12. Add 'AI-Agent/Fixed' label to product-is issue.
 =========================================
  LABEL-BASED PROCESSING
 =========================================
@@ -169,7 +151,6 @@ First need to understand what the issue is related to by reading the issue very 
 If that issue is related to multiple issue cases then use the below priority list to solve them.
 Broken Links > Spelling > Grammar > Documentation > Suggestions 
 MOST IMPORTANT:- When creating or editing any documentation, you MUST follow the Microsoft Style Guide (https://learn.microsoft.com/en-us/style-guide/welcome/). All changes must align with these guidelines.
-
 =========================================
  DOCUMENTATION STYLE GUIDELINES
 =========================================
@@ -210,15 +191,14 @@ SCOPE LIMITATION FOR EXISTING DOCUMENTS:
 - Do NOT modify existing content to match style guidelines unless the issue specifically requests formatting/style fixes
 - When adding new sections to existing documents, maintain stylistic consistency with the surrounding content while ensuring new content follows Microsoft guidelines
 - Focus style compliance efforts only on the portions you're creating or explicitly instructed to modify
-
 =========================================
  PR CREATION
 =========================================
 - MOST IMPORTANT: Create a SEPARATE PR for EACH affected version directory.
-- For each affected version, create a new branch with the format: ${BASE_BRANCH_NAME}-{VERSION} 
+- For each affected version, create a new branch with the format: ${BRANCH_NAME}-{VERSION} 
   (Example: fix-broken-links-123-20240601-5.11.0, fix-broken-links-123-20240601-6.0.0, etc.)
 - For common files outside version directories, create a single PR.
-- Base branch name: ${BASE_BRANCH_NAME} (always includes timestamp for uniqueness)
+- Base branch name: ${BRANCH_NAME} (always includes timestamp for uniqueness)
 - For each version-specific PR:
   - PR title: Fix: [short description] for version [VERSION] (Product IS issue #${ISSUE_NUMBER})
   - Commit msg: Fix: [short description] for version [VERSION] (product-is#${ISSUE_NUMBER})
@@ -239,7 +219,6 @@ SCOPE LIMITATION FOR EXISTING DOCUMENTS:
 - Each PR should be from its new version-specific branch in docs-is repo → master branch in docs-is repo
 - After creating ALL PRs, add a comment to the original product-is issue with links to ALL created PRs
 - The comment must list each PR with its corresponding version
-
 =========================================
  ERROR HANDLING
 =========================================
@@ -278,7 +257,7 @@ SCOPE LIMITATION FOR EXISTING DOCUMENTS:
  CLEANUP
 =========================================
 - After each issue:  
-  git checkout origin/master
+  git checkout origin/[next-version]  
 - Ensures no contamination across issues.
 
 =========================================
@@ -288,7 +267,7 @@ SCOPE LIMITATION FOR EXISTING DOCUMENTS:
 - You are fixing issues identified in the product-is repository, but creating PRs in docs-is repository.
 - You must correctly identify which version directories in the docs-is repository need to be updated.
 - For version-specific changes, create a SEPARATE PR for EACH affected version directory (en/identity-server/VERSION/).
-- Each version-specific PR must use a dedicated branch named ${BASE_BRANCH_NAME}-{VERSION}.
+- Each version-specific PR must use a dedicated branch named ${BRANCH_NAME}-{VERSION}.
 - For common files (outside version directories), make a single PR with all common file changes.
 - The task is NOT complete until ALL required version directories have separate PRs with their respective changes.
 - Only relevant files are changed in each version-specific PR.
@@ -298,38 +277,3 @@ SCOPE LIMITATION FOR EXISTING DOCUMENTS:
 - For issues that cannot be resolved, add the label AI-Agent/Cannot-Fix and provide the reason in a comment on the original product-is issue.
 - Add 'AI-Agent/Fixed' label to the product-is issue ONLY after creating ALL required PRs.
 - Always add a comment to the original product-is issue with links to ALL created PRs, clearly indicating which versions were updated in each PR.
-
-=========================================
- FINE-GRAINED TOKEN USAGE
-=========================================
-- Use fine-grained GitHub tokens for all repository operations, no additional credentials required
-- The token has read and write access to both product-is and docs-is repositories
-- No need for manual git config steps; the token handles authentication for you
-- When pushing changes to the docs-is repository, push directly to origin using the token
-- The token already has the necessary permissions to:
-  * Read issues from product-is
-  * Create/push branches to docs-is
-  * Create PRs in docs-is
-  * Add comments to issues in product-is
-  * Modify labels in product-is
-
-=========================================
- SUGGESTED WORKFLOW AUTOMATION
-=========================================
-1. Auto-Label and Dispatch Issues:
-   - When issue is labeled in product-is with "AI-Agent/In-Progress"
-   - Dispatch event to docs-is repository with issue details
-   - No manual git configuration required
-
-2. Handle Dispatched Issues in docs-is:
-   - Receive issue details from product-is
-   - Analyze which versions need updates
-   - Create separate branches/PRs for each affected version
-   - Push changes directly to origin branches
-   - Comment back to product-is issue with PR links
-   - Update labels in product-is issue when complete
-
-3. Creating Pull Requests:
-   - For each affected version, create a separate PR
-   - Use the GitHub API with fine-grained token
-   - No need for local git configuration
