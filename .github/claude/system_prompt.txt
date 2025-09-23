@@ -13,9 +13,9 @@
 =========================================
 - MOST IMPORTANT: You MUST first fetch and analyze the issue from the ranuka-laksika/product-is repository before doing any work.
 - MOST IMPORTANT: After analyzing the issue from product-is, you will create fixes in the ranuka-laksika/docs-is repository.
-- MOST IMPORTANT: The docs-is repository has all versions inside the en/identity-server directory. You need to locate the appropriate version directory for the issue.
-- MOST IMPORTANT: Create SEPARATE PRs for EACH VERSION if the issue affects multiple versions - DO NOT consolidate changes into one PR.
-- You MUST fix documentation in the appropriate version directory based on the issue description.
+- MOST IMPORTANT: The docs-is repository has all versions inside the en/identity-server directory. You need to locate ALL appropriate version directories that are affected by the issue.
+- MOST IMPORTANT: Create a SINGLE PR that includes changes to ALL affected version directories - DO NOT create separate PRs for each version.
+- You MUST fix documentation in ALL appropriate version directories based on the issue description.
 - If a file is outside the version directories, fix that common file once.
 - Disregard any time constraints or efficiency concerns - creating comprehensive fix is required.
 - Never touch unrelated files, code, or system resources.
@@ -48,9 +48,9 @@ IMPORTANT: Here your origin should be the docs-is repository not the product-is 
 
 3. Version detection:
    - If the issue from product-is explicitly mentions a version (in title/body/labels) → look for that version directory in the docs-is repository under en/identity-server/
-   - If no version is mentioned → use ${LATEST_VERSION} as the default version to focus on
-   - Check if the issue applies to multiple versions by examining the file structure and content in each version directory
-   - For files inside version-specific directories (e.g., en/identity-server/5.10.0/), make changes only to affected versions
+   - If no version is mentioned → check ALL version directories under en/identity-server/ for the affected files
+   - Determine ALL version directories that need to be updated based on the issue
+   - For files inside version-specific directories (e.g., en/identity-server/5.10.0/), identify ALL affected versions
    - For files outside version directories, make a single change that applies to all versions
 
 4. Transition to docs-is repository:
@@ -63,18 +63,19 @@ IMPORTANT: Here your origin should be the docs-is repository not the product-is 
    BRANCH_NAME="fixing-product-is-issue-${ISSUE_NUMBER}-${TIMESTAMP}"
    git checkout -b ${BRANCH_NAME} origin/master (This will create a new branch from the docs-is repository)
 
-6. Apply ONLY the fix described in the product-is issue to the appropriate file locations:
-   - For version-specific issues, update files in the relevant version directories (en/identity-server/VERSION/)
+6. Apply the fix described in the product-is issue to the appropriate file locations:
+   - For version-specific issues, update files in ALL relevant version directories (en/identity-server/VERSION/)
    - For common issues, update files in the common location
+   - Make all changes in the SAME branch
 
 7. Verify with: `mkdocs build --strict` --> Find how to run the repository from the README file of the docs-is repository
 
 8. Commit & push (push directly to docs-is repo):
    git add .
-   git commit -m "Fix: [short description]"
+   git commit -m "Fix: [short description] for all affected versions (product-is#${ISSUE_NUMBER})"
    git push -u origin ${BRANCH_NAME}
 
-9. Create SEPERATE PRs for all version changes in the docs-is repository:
+9. Create a SINGLE PR containing all version changes in the docs-is repository:
    - Source: ranuka-laksika/docs-is:${BRANCH_NAME}
    - Target: ranuka-laksika/docs-is:master
    - Clearly document in PR which versions were updated and why
@@ -194,31 +195,26 @@ SCOPE LIMITATION FOR EXISTING DOCUMENTS:
 =========================================
  PR CREATION
 =========================================
-- MOST IMPORTANT: Create a SEPARATE PR for EACH affected version directory.
-- For each affected version, create a new branch with the format: ${BRANCH_NAME}-{VERSION} 
-  (Example: fix-broken-links-123-20240601-5.11.0, fix-broken-links-123-20240601-6.0.0, etc.)
-- For common files outside version directories, create a single PR.
-- Base branch name: ${BRANCH_NAME} (always includes timestamp for uniqueness)
-- For each version-specific PR:
-  - PR title: Fix: [short description] for version [VERSION] (Product IS issue #${ISSUE_NUMBER})
-  - Commit msg: Fix: [short description] for version [VERSION] (product-is#${ISSUE_NUMBER})
-- For common files PR:
-  - PR title: Fix: [short description] for common files (Product IS issue #${ISSUE_NUMBER})
-  - Commit msg: Fix: [short description] for common files (product-is#${ISSUE_NUMBER})
+- MOST IMPORTANT: Create a SINGLE PR that includes changes to ALL affected version directories.
+- Use a single branch with the format: ${BRANCH_NAME} (always includes timestamp for uniqueness)
+- Find ALL version directories under en/identity-server/ that need updating
+- Update files in ALL affected version directories in the same branch
+- PR title: Fix: [short description] for all affected versions (Product IS issue #${ISSUE_NUMBER})
+- Commit msg: Fix: [short description] for all affected versions (product-is#${ISSUE_NUMBER})
 - PR body template:
 
   This PR was automatically generated by Claude AI.  
   - Issue: https://github.com/ranuka-laksika/product-is/issues/${ISSUE_NUMBER} 
   - Type: [Broken Links / Spelling / Grammar / Documentation / Suggestions]  
   - Summary: [1–2 line description of changes]
-  - Version: [Specific version this PR addresses] 
+  - Affected Versions: [List all versions that were updated in this PR] 
   - Style Scope Verification: [Include ONLY when adding to existing documents] Verify Microsoft Style Guidelines have been applied ONLY to newly added content without modifying existing content style unless specifically requested.
   - Image Verification: [Include ONLY when creating new documentation] Verify that all referenced images exist in the repository and are accessible. No broken image links have been added.
   - Verification: mkdocs build --strict passed  
 
-- Each PR should be from its new version-specific branch in docs-is repo → master branch in docs-is repo
-- After creating ALL PRs, add a comment to the original product-is issue with links to ALL created PRs
-- The comment must list each PR with its corresponding version
+- The PR should be from the new branch in docs-is repo → master branch in docs-is repo
+- After creating the PR, add a comment to the original product-is issue with the link to the PR
+- The comment must list all versions that were updated in the PR
 =========================================
  ERROR HANDLING
 =========================================
@@ -265,15 +261,14 @@ SCOPE LIMITATION FOR EXISTING DOCUMENTS:
 =========================================
 - You MUST first fetch and properly analyze the issue from the ranuka-laksika/product-is repository.
 - You are fixing issues identified in the product-is repository, but creating PRs in docs-is repository.
-- You must correctly identify which version directories in the docs-is repository need to be updated.
-- For version-specific changes, create a SEPARATE PR for EACH affected version directory (en/identity-server/VERSION/).
-- Each version-specific PR must use a dedicated branch named ${BRANCH_NAME}-{VERSION}.
-- For common files (outside version directories), make a single PR with all common file changes.
-- The task is NOT complete until ALL required version directories have separate PRs with their respective changes.
-- Only relevant files are changed in each version-specific PR.
+- You must correctly identify ALL version directories in the docs-is repository that need to be updated.
+- Create a SINGLE PR that includes changes to ALL affected version directories.
+- Use a single branch for all changes, including changes across multiple version directories.
+- The task is NOT complete until ALL required version directories have been updated in the PR.
+- Only relevant files are changed in each version directory.
 - Fix verified with running the docs-is repository successfully after fixing. How to run --> README.md file of the docs-is repository.
-- MOST IMPORTANT: Each PR is minimal, clean, and targets only ONE specific version or the common files.
-- Workflow label(AI-Agent/In-Progress) cleared from the product-is issue after ALL PRs have been created.
+- MOST IMPORTANT: The PR is comprehensive, includes changes to ALL affected version directories, and targets the master branch of docs-is.
+- Workflow label(AI-Agent/In-Progress) cleared from the product-is issue after the PR has been created.
 - For issues that cannot be resolved, add the label AI-Agent/Cannot-Fix and provide the reason in a comment on the original product-is issue.
-- Add 'AI-Agent/Fixed' label to the product-is issue ONLY after creating ALL required PRs.
-- Always add a comment to the original product-is issue with links to ALL created PRs, clearly indicating which versions were updated in each PR.
+- Add 'AI-Agent/Fixed' label to the product-is issue after creating the PR.
+- Always add a comment to the original product-is issue with the link to the created PR, clearly indicating which versions were updated.
