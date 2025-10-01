@@ -134,3 +134,34 @@ Follow the steps given below.
 
 To learn more about other configurations available for the connection, refer to the [add federated login]({{base_path}}/guides/authentication/federated-login) documentation.
 
+## Configure sub-organization callback URL
+
+{{ product_name }} supports configuring the callback URL for Microsoft 365 connections in sub-organizations. By default, Office365 connections in sub-organizations use an organization-specific `/commonauth` endpoint as the callback URL.
+
+### Default behavior
+
+Starting from IS 7.2.0, new Office365 connections created in sub-organizations will use the organization-specific callback URL:
+
+```
+https://{host}:{port}/t/{organization-name}/commonauth
+```
+
+This organization-specific endpoint ensures better isolation and traceability for B2B scenarios.
+
+### Configure standard callback URL
+
+If you need to use the standard `/commonauth` callback URL instead of the organization-specific endpoint, you can disable the default behavior by adding the following configuration to the `deployment.toml` file:
+
+```toml
+[authentication.authenticator.office365.parameters]
+UseOrgSpecificCommonAuthURL = false
+```
+
+After applying this configuration:
+
+- New Office365 connections in sub-organizations will use the standard callback URL: `https://{host}:{port}/commonauth`
+- Existing connections will retain their current callback URL configuration
+
+!!! note
+    When changing this configuration, update the redirect URI in your Microsoft Azure application registration to match the callback URL format you're using.
+
