@@ -500,7 +500,7 @@ Now **Disable SMSOTP** option is available for the user.
 
 ## Configuring backup codes for SMSOTP
 
-Optionally , you can configure back up codes when SMS OTP is disabled. To configure 
+Optionally, you can configure backup codes as a fallback authentication method when SMS OTP is enabled but temporarily inaccessible (for example, when a user cannot receive the SMS). To configure 
 backup codes, follow the steps given below.
     
 ### Adding OTP backup codes claim  
