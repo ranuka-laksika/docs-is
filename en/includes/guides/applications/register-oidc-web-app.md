@@ -79,3 +79,4 @@ You can get this client ID and client secret from the **Protocol** tab of the ap
 ## What's next?
 
 - [Add login to your web app]({{base_path}}/guides/authentication/add-login-to-web-app/)
+- [Authorize MCP servers]({{base_path}}/guides/authorization/mcp-server-authorization/) - Traditional web applications can authorize MCP servers through the **Authorization** tab to enable AI agent interactions.

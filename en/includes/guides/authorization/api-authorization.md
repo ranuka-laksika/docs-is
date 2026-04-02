@@ -4,6 +4,9 @@ Role Based Access Control (RBAC) lets organizations grant limited access to its 
 
 {{product_name}} uses the following terms to define various components of API authorization.
 
+!!! note
+    The term "API resources" in {{product_name}} refers to protected resources that can be authorized for applications. This includes business APIs, management/organization APIs, and MCP servers. Applications can authorize both API resources and MCP servers through the **Authorization** tab.
+
 <table>
     <tr>
         <th>Term</th>
@@ -11,7 +14,7 @@ Role Based Access Control (RBAC) lets organizations grant limited access to its 
     </tr>
     <tr>
         <td>API resources</td>
-        <td>Defines an API and its permissions(in the form of scopes). This could be a <a href="#register-a-business-api">business API</a> or a <a href="{{base_path}}/apis/">management/organization API</a> exposed by {{product_name}}.</td>
+        <td>Defines an API and its permissions(in the form of scopes). This could be a <a href="#register-a-business-api">business API</a> or a <a href="{{base_path}}/apis/">management/organization API</a> exposed by {{product_name}}. MCP servers are also managed as protected resources alongside API resources.</td>
     </tr>
     <tr>
         <td>Permissions</td>
@@ -136,7 +139,10 @@ To authorize an application to consume an API resource:
 
 1. On the {{ product_name }} Console, go to **Applications**.
 
-2. Select the application and go to its **API Authorization** tab.
+2. Select the application and go to its **Authorization** tab.
+
+    !!! note
+        The **Authorization** tab allows you to authorize both API resources and MCP servers for your application. For information on authorizing MCP servers, see [MCP server authorization]({{base_path}}/guides/authorization/mcp-server-authorization).
 
     !!! warning
         You cannot authorize API resources for a SAML application.

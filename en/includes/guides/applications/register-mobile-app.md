@@ -72,3 +72,4 @@ You can get this client ID from the **Protocol** tab of the application as shown
 ## What's next?
 
 - [Add login to your mobile app]({{base_path}}/guides/authentication/add-login-to-mobile-app/)
+- [Authorize MCP servers]({{base_path}}/guides/authorization/mcp-server-authorization/) - Mobile applications can authorize MCP servers through the **Authorization** tab to enable AI agent interactions.
