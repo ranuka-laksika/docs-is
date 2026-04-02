@@ -50,3 +50,4 @@ To register an application:
 
 - [Configuring an OIDC application]({{base_path}}/references/app-settings/oidc-settings-for-app/)
 - [Configuring a SAML application]({{base_path}}/references/app-settings/saml-settings-for-app/)
+- [Authorize MCP servers]({{base_path}}/guides/authorization/mcp-server-authorization/) - OIDC applications can authorize MCP servers through the **Authorization** tab to enable AI agent interactions.
