@@ -52,5 +52,5 @@ To regiser an MCP Client application,
 {% if product_name == "Asgardeo" %}
 - [End-to-end MCP Authorization with Asgardeo]({{base_path}}/tutorials/end-to-end-mcp-authorization-with-asgardeo/)
 {% else %}
-- [Implement authorization code flow with PKCE]({{base_path}}/guides/authentication/oidc/implement-auth-code-with-pkce/)
+- [Secure Agentic AI Systems with WSO2 Identity Server]({{base_path}}/tutorials/secure-agentic-ai-systems/)
 {% endif %}
