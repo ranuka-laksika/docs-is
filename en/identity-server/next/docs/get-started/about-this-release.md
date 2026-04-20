@@ -125,10 +125,16 @@ WSO2 Identity Server 7.1.0 introduces a range of new features and enhancements:
 
 - **Enhanced organization management capabilities**
 
+    - **Organization-Specific Callback URL for Office365 Connections**
+
+        Office365 connections in sub-organizations now use an organization-specific `/commonauth` endpoint as the default callback URL. This enhancement provides better isolation and traceability for B2B scenarios. The default behavior can be configured using the `UseOrgSpecificCommonAuthURL` parameter in the `deployment.toml` file.
+
+        Learn more about [configuring sub-organization callback URL]({{base_path}}/guides/authentication/enterprise-login/add-microsoft-365-login/#configure-sub-organization-callback-url).
+
     - **B2B Organization Filtering & Discovery Improvements**
 
         Supports organization filtering using meta attributes, expanding beyond standard filters like name, ID, and parent organization. This enhancement enables more precise and flexible organization searches, improving management and discovery across complex organizational structures.
-    
+
         Learn more about [searching for organizations]({{base_path}}/guides/organization-management/manage-organizations/#search-an-organization).
 
 
