@@ -331,7 +331,7 @@ Now **Disable SMSOTP** option is available for the user.
 
 ## Configuring backup codes for SMSOTP
 
-Optionally , you can configure back up codes when SMS OTP is disabled. To configure 
+Optionally , you can configure back up codes when SMS OTP is temporarily inaccessible (e.g., when a user cannot receive the SMS). To configure 
 backup codes, follow the steps given below.
     
 ### Adding OTP backup codes claim  
@@ -358,8 +358,7 @@ backup codes, follow the steps given below.
 1.  Navigate to **Main** -> **Identity** -> **Users and Roles** -> **List** -> **Users**.
 
 4.  Click **User Profile** of a preferred user and update
-    the backup codes so that the user can disable SMS OTP by selecting
-    **Disable SMS OTP** if required.
+    the backup codes so that the user can use them when SMS OTP is temporarily inaccessible.
 
     !!! info
 		A backup code can have any number of digits, and you can define many
